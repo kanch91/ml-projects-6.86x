@@ -46,7 +46,7 @@ def init(X: np.ndarray, K: int,
 
 
 def plot(X: np.ndarray, mixture: GaussianMixture, post: np.ndarray,
-         title: str):
+         title: str) -> object:
     """Plots the mixture model for 2D data"""
     _, K = post.shape
 
@@ -98,4 +98,19 @@ def bic(X: np.ndarray, mixture: GaussianMixture,
     Returns:
         float: the BIC for this mixture
     """
+    n = X.shape[0]  # Number of data points
+
+    # Number of adjustable parameters = total parameters - 1 (last probability = 1 - sum(other probability))
+    p = 0 # Number of free parameters
+    for i in range(len(mixture)):
+        if i == 0:
+            p += mixture[i].shape[0] * mixture[i].shape[1]  # For means: K times d
+        else:
+            p += mixture[i].shape[0]  # Other parameters: just add K
+    p -= 1 #Subtracting 1 as mixture weights also add to 1
+
+    bic = log_likelihood - (p * np.log(n)) / 2.0    # BIC: log_likelihood - (1/2)*p*log(n)
+
+    return bic
+
     raise NotImplementedError

@@ -30,13 +30,13 @@ bic = [0., 0., 0., 0.]
 
 for k in range(len(K)):
     for i in range(len(seeds)):
-        # Running the kMeans algorithm written in file "kmeans.py"
+        # Running the kMeans algorithm written in file kmeans.py
         kMeans_mixtures[i], kMeans_posts[i], kMeans_cost[i] = \
             kmeans.run(X, *common.init(X, K[k], seeds[i]))
 
-        # # Running the Naive EM algorithm written in file "naive_em.py"
-        # mixtures_EM[i], posts_EM[i], EM_cost[i] = \
-        #     naive_em.run(X, *common.init(X, K[k], seeds[i]))
+        # Running the Naive EM algorithm written in file naive_em.py
+        EM_mixtures[i], EM_posts[i], EM_cost[i] = \
+            naive_em.run(X, *common.init(X, K[k], seeds[i]))
 
     # Printing the lowest cost
     print("---------------------------------------------------")
@@ -55,13 +55,13 @@ for k in range(len(K)):
                 kMeans_posts[kMeans_best_seed[k]],
                 title="kMeans")
 
-    # common.plot(X,
-    #             mixtures_EM[EM_best_seed[k]],
-    #             posts_EM[EM_best_seed[k]],
-    #             title="EM")
-    #
-    # # BIC score for EM algorithm
-    # bic[k] = common.bic(X, mixtures_EM[EM_best_seed[k]], np.max(EM_cost))
+    common.plot(X,
+                EM_mixtures[EM_best_seed[k]],
+                EM_posts[EM_best_seed[k]],
+                title="EM")
+
+    # BIC score for EM algorithm
+    bic[k] = common.bic(X, EM_mixtures[EM_best_seed[k]], np.max(EM_cost))
 
 # Print the best K based on BIC
 print("---------------------------------------------------")
