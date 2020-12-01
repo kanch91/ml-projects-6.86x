@@ -173,15 +173,35 @@ def fill_matrix(X: np.ndarray, mixture: GaussianMixture) -> np.ndarray:
     Returns
         np.ndarray: a (n, d) array with completed data
     """
-
+    n, d = X.shape
     X_pred = X.copy()
-    mu, _, _ = mixture
-    post, _ = estep(X, mixture)
+    K, _ = mixture.mu.shape
 
-    # Missing entries to be filled
-    miss_indices = np.where(X == 0)
-    X_pred[miss_indices] = (post @ mu)[miss_indices]
-
+    for i in range(n):
+        mask = X[i, :] != 0
+        mask0 = X[i, :] == 0
+        post = np.zeros(K)
+        for j in range(K):
+            log_likelihood = log_gaussian(X[i, mask], mixture.mu[j, mask],
+                                          mixture.var[j])
+            post[j] = np.log(mixture.p[j]) + log_likelihood
+        post = np.exp(post - logsumexp(post))
+        X_pred[i, mask0] = np.dot(post, mixture.mu[:, mask0])
     return X_pred
 
-    raise NotImplementedError
+
+def log_gaussian(x: np.ndarray, mean: np.ndarray, var: float) -> float:
+    """Computes the log probablity of vector x under a normal distribution
+
+    Args:
+        x: (d, ) array holding the vector's coordinates
+        mean: (d, ) mean of the gaussian
+        var: variance of the gaussian
+
+    Returns:
+        float: the log probability
+    """
+    d = len(x)
+    log_prob = -d / 2.0 * np.log(2 * np.pi * var)
+    log_prob -= 0.5 * ((x - mean)**2).sum() / var
+    return log_prob
